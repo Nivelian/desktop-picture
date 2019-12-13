@@ -17,11 +17,17 @@
   (get-json (format "https://api.unsplash.com/photos/random?query=%s&orientation=landscape" query)
             {"Authorization" "Client-ID f68d033e10a3261de3de11fddd37b39e64268b263809578a1c318db003bac32c"}))
 
+(defn get-ar [x]
+  (clojure.string/replace
+   (format "%.4f" (double (/ (:width x) (:height x)))) #"," "."))
+
 (defn cut-img [url]
-  (format "%s&fit=crop&w=%s&h=%s&crop=edges" url (:width resolution) (:height resolution)))
+  (format "%s&fit=crop&ar=%s:1&crop=edges" url (get-ar resolution)))
+
+(defn log [x] (do (println x) x))
 
 (defn download-img [url]
-  (io/copy (:body (client/get (cut-img url) {:as :stream}))
+  (io/copy (:body (client/get (log (cut-img url)) {:as :stream}))
            (java.io.File. (str (.getTime (java.util.Date.)) ".jpg"))))
 
 (defn delete-old []
